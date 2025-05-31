@@ -14,6 +14,10 @@ const navItems = [
     href: '/companions',
   },
   {
+    label: 'Pricing',
+    href: '/subscription'
+  },
+  {
     label: 'My Journey',
     href: '/my-journey',
   }
