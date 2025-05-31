@@ -5,9 +5,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { getUserCompanions, getUserSession } from "@/lib/actions/companion.actions";
+import { getUserBookmark, getUserCompanions, getUserSession } from "@/lib/actions/companion.actions";
 import { currentUser } from "@clerk/nextjs/server"
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 const Profile = async () => {
@@ -17,6 +18,7 @@ const Profile = async () => {
 
   const companions = await getUserCompanions(user.id);
   const sessionHistory = await getUserSession(10, user.id);
+  const bookmarkedCompanions = await getUserBookmark(user.id);
 
   return (
     <main className="min-lg:w-3/4">
@@ -72,20 +74,54 @@ const Profile = async () => {
         <AccordionItem value="recent">
           <AccordionTrigger className="text-2xl font-bold">Recent Sessions</AccordionTrigger>
           <AccordionContent>
-            <CompanionsList 
-              title="Recent Sessions"
-              companions={sessionHistory}
-            />
+            {sessionHistory.length >= 1 ? (
+              <CompanionsList 
+                title="Recent Sessions"
+                companions={sessionHistory}
+              />
+            ) : (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-bold">You don't have any recent session</p>
+
+                <Link href='/companions' className="btn-primary w-fit">
+                  Let's Learn!
+                </Link>
+              </div>
+            )}
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="companions">
           <AccordionTrigger className="text-2xl font-bold">Companions {`(${companions.length})`}</AccordionTrigger>
           <AccordionContent>
-            <CompanionsList 
-              title="My Companions"
-              companions={companions}
-            />
+            {companions.length >= 1 ? (
+              <CompanionsList 
+                title="My Companions"
+                companions={companions}
+              />
+            ) : (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-bold">You don't have any companions yet</p>
+
+                <Link href='/companions/new' className="btn-primary w-fit">
+                  Create Your First Companion!
+                </Link>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="bookmark">
+          <AccordionTrigger className="text-2xl font-bold">Bookmarked Companions {`(${bookmarkedCompanions.length})`}</AccordionTrigger>
+          <AccordionContent>
+            {bookmarkedCompanions.length >= 1 ? (
+              <CompanionsList 
+                title="My Companions"
+                companions={bookmarkedCompanions}
+              />
+            ) : (
+              <p className="text-sm font-bold">You don't have any Bookmarked Companions</p>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>

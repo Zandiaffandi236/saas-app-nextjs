@@ -3,8 +3,10 @@ import SearchInput from "@/components/SearchInput";
 import SubjectFilter from "@/components/SubjectFilter";
 import { getAllCompanions } from "@/lib/actions/companion.actions";
 import { getSubjectColor } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 
 const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
+  const { userId } = await auth();
   const filters = await searchParams;
   const subject = filters.subject ? filters.subject : '';
   const topic = filters.topic ? filters.topic : '';
@@ -26,6 +28,7 @@ const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
           <CompanionCard 
             key={companion.id} 
             {...companion}
+            userId={userId}
             color={getSubjectColor(companion.subject)} 
           />
         ))}

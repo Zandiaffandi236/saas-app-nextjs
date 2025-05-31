@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button'
 import { recentSessions } from '@/constants'
 import { getAllCompanions, getRecentSession } from '@/lib/actions/companion.actions'
 import { getSubjectColor } from '@/lib/utils'
+import { auth } from '@clerk/nextjs/server'
 import React from 'react'
 
 const Page = async () => {
+  const { userId } = await auth();
   const companions = await getAllCompanions({ limit: 3 });
   const recentSessionsCompanions = await getRecentSession(10);
 
@@ -20,6 +22,7 @@ const Page = async () => {
           <CompanionCard 
             key={companion.id}
             {...companion}
+            userId={userId}
             color={getSubjectColor(companion.subject)}
           />
         ))}

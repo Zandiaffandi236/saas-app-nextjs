@@ -1,5 +1,11 @@
+'use client';
+
+import { addUserBookmark, removeUserBookmark } from "@/lib/actions/companion.actions";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface CompanionCardProps {
   id: string;
@@ -7,17 +13,49 @@ interface CompanionCardProps {
   topic: string;
   subject: string;
   duration: number;
+  bookmarked: boolean;
+  userId: string | null;
   color: string;
 }
 
-const CompanionCard = ({ id, name, topic, subject, duration, color }: CompanionCardProps) => {
+const CompanionCard = ({ id, name, topic, subject, duration, bookmarked: initialBookmarked, userId, color }: CompanionCardProps) => {
+  const [bookmarked, setBookmarked] = useState(initialBookmarked);
+  const [loading, setLoading] = useState(false);
+
+  const handleBookmark = async () => {
+    if (!userId || loading) return;
+
+    setLoading(true);
+    try {
+      if (bookmarked) {
+        await removeUserBookmark(id, userId);
+        setBookmarked(false);
+        toast.success(`${name} removed from Bookmark!`);
+      } else {
+        await addUserBookmark(id, userId);
+        setBookmarked(true);
+        toast.success(`${name} added to Bookmark!`);
+      }
+    } catch (error) {
+      console.error('Bookmark action failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <article className="companion-card" style={{ backgroundColor: color }}>
       <div className="flex justify-between items-center">
         <div className="subject-badge">{subject}</div>
-        <button className="companion-bookmark">
+        <button 
+          className={cn(
+            "companion-bookmark",
+            !userId && "hidden"
+          )}
+          onClick={handleBookmark}
+        >
           <Image 
-            src='/icons/bookmark.svg'
+            src={ bookmarked ? '/icons/bookmark-filled.svg' : '/icons/bookmark.svg'}
             alt="bookmark"
             width={12.5}
             height={15}
