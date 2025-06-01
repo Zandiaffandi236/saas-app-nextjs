@@ -198,3 +198,41 @@ export const newCompanionPermissions = async () => {
     return true;
   }
 };
+
+export const newSessionPermissions = async () => {
+  const { userId, has } = await auth();
+  const supabase = createSupabaseClient(); 
+  const date = new Date();
+
+  let limit = 0;
+
+  if (has({ plan: 'pro_companion' })) {
+    return true;
+  } else if (has({ plan: 'core_learner' })) {
+    return true;
+  } else if (has({ feature: '10_conversation_month' })) {
+    limit = 10;
+  }
+
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const fromDate = new Date(year, month, 1);
+  const toDate = new Date(year, month + 1, 1);
+  
+  const { data, error } = await supabase
+    .from('session_history')
+    .select('created_at, user_id', { count: 'exact' })
+    .eq('user_id', userId)
+    .gte('created_at', fromDate.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
+    .lt('created_at', toDate.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
+
+  if (error) throw new Error(error.message);
+
+  const sessionCount = data?.length;
+
+  if (sessionCount >= limit) {
+    return false;
+  } else {
+    return true;
+  }
+};
